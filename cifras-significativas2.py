@@ -1,7 +1,7 @@
 import streamlit as st
 import random
 import numpy as np
-#hola
+
 # Funciones auxiliares para redondeo
 
 def redondear_incertidumbre(inc):
@@ -47,22 +47,28 @@ st.markdown("### Instrucciones")
 st.info("Redacte correctamente el valor central y la incertidumbre con unidades. La incertidumbre debe tener solo **una cifra significativa**. Puede usar el botón ± para añadir el símbolo correspondiente.")
 
 # Botón ± global
-if st.button("Insertar símbolo ±"):
-    st.markdown("Copia y pega: `±`")
+with st.expander("Mostrar ayuda para escribir el símbolo ±"):
+    st.markdown("Presione el botón para copiar el símbolo ± y péguelo donde corresponda en su respuesta.")
+    if st.button("Copiar símbolo ±"):
+        st.code("±")
 
 # Formulario con 5 preguntas
 with st.form("formulario_respuestas"):
+    respuestas_input = []
     for i, (valor, inc, unidad) in enumerate(st.session_state.preguntas_mostradas):
         st.markdown(f"### Caso {i+1}")
         st.latex(f"{valor} \\pm {inc} \\ \text{{{unidad}}}")
-        st.session_state.respuestas[i] = st.text_input(f"Respuesta {i+1}",
-            value=st.session_state.respuestas[i],
+        respuesta = st.text_input(
+            label=f"Redacte correctamente el valor central y la incertidumbre (Caso {i+1})",
             placeholder="Ejemplo: 12.3 ± 0.3 m",
-            key=f"respuesta_{i+1}")
+            key=f"respuesta_{i+1}"
+        )
+        respuestas_input.append(respuesta)
 
-    enviado = st.form_submit_button("Enviar")
-    if enviado and not st.session_state.enviado:
+    enviar = st.form_submit_button("Enviar respuestas")
+    if enviar and not st.session_state.enviado:
         st.session_state.enviado = True
+        st.session_state.respuestas = respuestas_input
         st.success("✅ Su respuesta ha sido enviada.")
 
 # Mostrar respuestas si se envió
