@@ -2,12 +2,14 @@ import streamlit as st
 import random
 import numpy as np
 
+# Funciones auxiliares para redondeo
+
 def redondear_incertidumbre(inc):
     if inc == 0:
         return 0
     cifras = int(np.floor(np.log10(abs(inc))))
-    primera = round(inc / (10**cifras))
-    return primera * 10**cifras
+    primera = round(inc / (10 ** cifras))
+    return primera * 10 ** cifras
 
 def redondear_valor_central(valor, inc_redondeada):
     cifras = int(np.floor(np.log10(abs(inc_redondeada))))
@@ -24,7 +26,7 @@ def generar_preguntas(n=100):
         preguntas.append((valor, inc, unidad))
     return preguntas
 
-# Estado inicial de sesión
+# Inicializar estado de sesión
 if "preguntas_totales" not in st.session_state:
     st.session_state.preguntas_totales = generar_preguntas(100)
 
@@ -32,49 +34,44 @@ if "preguntas_mostradas" not in st.session_state:
     st.session_state.preguntas_mostradas = random.sample(st.session_state.preguntas_totales, 5)
 
 if "respuestas" not in st.session_state:
-    st.session_state.respuestas = [""] * 5
+    st.session_state.respuestas = ["" for _ in range(5)]
 
 if "enviado" not in st.session_state:
     st.session_state.enviado = False
 
-# Layout
 st.set_page_config(page_title="Redacción de Incertidumbre", layout="centered")
-st.title("🧪 Redacción correcta de incertidumbres")
+st.title("Redacción correcta de incertidumbres")
 
-st.info("Expresa correctamente los siguientes 5 casos. Usa el símbolo **±** con una sola cifra significativa para la incertidumbre, y redondea el valor central en consecuencia.")
+st.markdown("---")
+st.markdown("### Instrucciones")
+st.info("Redacte correctamente el valor central y la incertidumbre con unidades. La incertidumbre debe tener solo **una cifra significativa**. Puede usar el botón ± para añadir el símbolo correspondiente.")
 
-st.markdown("Puedes copiar el símbolo desde aquí si lo necesitas:")
-st.code("±")
+# Botón ± global
+if st.button("Insertar símbolo ±"):
+    st.markdown("Copia y pega: `±`")
 
-# Formulario interactivo
-with st.form("formulario"):
-    for i, (valor, incert, unidad) in enumerate(st.session_state.preguntas_mostradas, start=1):
-        st.markdown(f"### Caso {i}")
-        st.latex(f"{valor} \\pm {incert}\\;\\text{{{unidad}}}")
-        
-        col1, col2 = st.columns([4, 1])
-        with col1:
-            st.session_state.respuestas[i-1] = st.text_input(f"Ingrese su respuesta {i}", 
-                value=st.session_state.respuestas[i-1],
-                key=f"respuesta_{i}",
-                placeholder="Ejemplo: 12.3 ± 0.3 m")
-        with col2:
-            st.markdown("### ")
-            if st.button(f"±", key=f"boton_{i}"):
-                st.session_state.respuestas[i-1] += " ± "
+# Formulario con 5 preguntas
+with st.form("formulario_respuestas"):
+    for i, (valor, inc, unidad) in enumerate(st.session_state.preguntas_mostradas):
+        st.markdown(f"### Caso {i+1}")
+        st.latex(f"{valor} \\pm {inc} \\ \text{{{unidad}}}")
+        st.session_state.respuestas[i] = st.text_input(f"Respuesta {i+1}",
+            value=st.session_state.respuestas[i],
+            placeholder="Ejemplo: 12.3 ± 0.3 m",
+            key=f"respuesta_{i+1}")
 
     enviado = st.form_submit_button("Enviar")
-
     if enviado and not st.session_state.enviado:
         st.session_state.enviado = True
-        st.success("✅ Tus respuestas han sido enviadas correctamente. Solo puedes responder una vez.")
+        st.success("✅ Su respuesta ha sido enviada.")
 
-# Mostrar respuestas correctas solo después de enviar
+# Mostrar respuestas si se envió
 if st.session_state.enviado:
     st.markdown("---")
-    st.subheader("✔️ Respuestas correctas")
-
-    for i, (valor, incert, unidad) in enumerate(st.session_state.preguntas_mostradas, start=1):
-        incert_red = redondear_incertidumbre(incert)
-        valor_red = redondear_valor_central(valor, incert_red)
-        st.write(f"**Caso {i}:** `{valor_red} ± {incert_red} {unidad}`")
+    st.subheader("Respuestas del estudiante y respuestas correctas")
+    for i, (valor, inc, unidad) in enumerate(st.session_state.preguntas_mostradas):
+        inc_red = redondear_incertidumbre(inc)
+        valor_red = redondear_valor_central(valor, inc_red)
+        st.markdown(f"**Caso {i+1}:**")
+        st.markdown(f"- Tu respuesta: `{st.session_state.respuestas[i]}`")
+        st.markdown(f"- Respuesta correcta: `{valor_red} ± {inc_red} {unidad}`")
