@@ -44,20 +44,24 @@ st.title("Redacción correcta de incertidumbres")
 
 st.markdown("---")
 st.markdown("### Instrucciones")
-st.info("Redacte correctamente el valor central y la incertidumbre con unidades. La incertidumbre debe tener solo **una cifra significativa**. Puede usar el botón ± para añadir el símbolo correspondiente.")
+st.info("Redacte correctamente el valor central y la incertidumbre con unidades. La incertidumbre debe tener solo **una cifra significativa**. Puede usar el símbolo ± que se muestra abajo.")
 
-# Botón ± global
-with st.expander("Mostrar ayuda para escribir el símbolo ±"):
-    st.markdown("Presione el botón para copiar el símbolo ± y péguelo donde corresponda en su respuesta.")
-    if st.button("Copiar símbolo ±"):
-        st.code("±")
+# Mostrar símbolo ± con opción para copiar
+st.markdown("#### Símbolo ± para redactar respuestas")
+col1, col2 = st.columns([6, 1])
+with col1:
+    st.text_input("Símbolo ± (puede copiarlo desde aquí)", value="±", key="simbolo_pm")
+with col2:
+    st.write("")
+    st.write("")
+    st.markdown("⬅️ Copie este símbolo")
 
 # Formulario con 5 preguntas
 with st.form("formulario_respuestas"):
     respuestas_input = []
     for i, (valor, inc, unidad) in enumerate(st.session_state.preguntas_mostradas):
         st.markdown(f"### Caso {i+1}")
-        st.latex(f"{valor} \\pm {inc} \\ \text{{{unidad}}}")
+        st.latex(f"{valor} \\pm {inc} \\, \\mathrm{{{unidad}}}")
         respuesta = st.text_input(
             label=f"Redacte correctamente el valor central y la incertidumbre (Caso {i+1})",
             placeholder="Ejemplo: 12.3 ± 0.3 m",
