@@ -13,8 +13,7 @@ def redondear_incertidumbre(inc):
 
 def redondear_valor_central(valor, inc_redondeada):
     cifras = int(np.floor(np.log10(abs(inc_redondeada))))
-    decimales = -cifras if cifras < 0 else 0
-    return round(valor, decimales)
+    return int(round(valor / (10 ** cifras)) * (10 ** cifras))
 
 def generar_preguntas(n=100):
     unidades = ["m", "kg", "s", "cm", "mm", "L", "°C", "mol", "Pa", "W"]
